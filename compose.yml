@@ -1,0 +1,14 @@
+version: '3'
+services:
+  bind:
+    container_name: bind
+    image: dnomd343/bind
+    network_mode: host
+    restart: always
+    command: -f
+    volumes:
+      - ./named/:/var/bind/
+      - ./log/:/var/log/bind/
+      - ./named.conf:/etc/bind/named.conf:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
