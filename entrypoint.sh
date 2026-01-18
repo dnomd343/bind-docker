@@ -2,11 +2,14 @@
 
 set -e
 
-if [[ "$1" == "dig" ]] || [[ "$1" == "rndc" ]] || [[ "$1" == "nslookup" ]] || [[ "$1" == "nsupdate" ]] || [[ "$1" == "tsig-keygen" ]] || [[ "$1" == "ddns-confgen" ]] || [[ "$1" == "rndc-confgen" ]]; then
-  exec $@
-  echo "Failed to run command -> \`$@\`"
-  exit 1
-fi
+tools="arpaname ddns-confgen delv dig dnssec-cds dnssec-dsfromkey dnssec-importkey dnssec-keyfromlabel dnssec-keygen dnssec-ksr dnssec-revoke dnssec-settime dnssec-signzone dnssec-verify dnstap-read host mdig named-checkconf named-checkzone named-compilezone named-journalprint named-rrchecker nsec3hash nslookup nsupdate rndc rndc-confgen tsig-keygen"
+for item in $tools; do
+  if [ "$1" = "$item" ]; then
+    exec $@
+    echo "Failed to run command -> \`$@\`"
+    exit 1
+  fi
+done
 
 if [ ! -f "/var/bind/named.ca" ]; then
   cp /usr/share/dns-root-hints/named.root /var/bind/named.ca
