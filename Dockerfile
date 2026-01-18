@@ -1,9 +1,16 @@
-FROM alpine:3.20
-RUN apk add --no-cache bind bind-tools && update-dns-root-hints && \
-    rm -f /usr/share/dns-root-hints/*.cache && \
-    rm -f /usr/share/dnssec-root/bind.keys && \
-    rm -rf /etc/bind/* /var/bind/* && \
-    rm -rf /etc/periodic/
+FROM alpine:3.23
+
+RUN apk add --no-cache bind bind-tools bind-dnssec-root bind-dnssec-tools && \
+
+    # fetch the latest root hints
+    update-dns-root-hints && \
+
+    # remove default configurations
+    rm -rf /etc/bind/ /var/bind/* && \
+
+    # clean up unnecessary files
+    rm /etc/group- /etc/passwd- /etc/shadow- /var/log/apk.log /etc/periodic/monthly/dns-root-hints
+
 COPY named.conf /etc/bind/named.conf
 COPY entrypoint.sh /named
 ENTRYPOINT ["/named"]
