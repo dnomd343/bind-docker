@@ -2,27 +2,23 @@
 
 set -e
 
-tools="arpaname ddns-confgen delv dig dnssec-cds dnssec-dsfromkey dnssec-importkey dnssec-keyfromlabel dnssec-keygen dnssec-ksr dnssec-revoke dnssec-settime dnssec-signzone dnssec-verify dnstap-read host mdig named-checkconf named-checkzone named-compilezone named-journalprint named-rrchecker nsec3hash nslookup nsupdate rndc rndc-confgen tsig-keygen"
-for item in $tools; do
-  if [ "$1" = "$item" ]; then
-    exec $@
-    echo "Failed to run command -> \`$@\`"
-    exit 1
-  fi
-done
+case "${1:-}" in
+  arpaname|delv|dig|dnstap-read|host|mdig|nslookup|\
+  ddns-confgen|nsupdate|rndc|rndc-confgen|tsig-keygen|\
+  dnssec-cds|dnssec-dsfromkey|dnssec-ksr|dnssec-signzone|dnssec-verify|nsec3hash|\
+  dnssec-importkey|dnssec-keyfromlabel|dnssec-keygen|dnssec-revoke|dnssec-settime|\
+  named-checkzone|named-compilezone|named-journalprint|named-rrchecker)
+    exec "$@"
+    ;;
+esac
 
-if [ ! -f "/var/bind/named.ca" ]; then
+[ -f /var/bind/named.ca ] ||
   cp /usr/share/dns-root-hints/named.root /var/bind/named.ca
-fi
 
-if [ ! -f "/etc/bind/bind.keys" ]; then
+[ -f /etc/bind/bind.keys ] ||
   cp /usr/share/dnssec-root/bind-dnssec-root.keys /etc/bind/bind.keys
-fi
 
-named-checkconf
+[ "${1:-}" = named-checkconf ] && exec "$@"
 
-if [ $# -eq 0 ]; then
-  exec named -g
-else
-  exec named $@
-fi
+[ "$#" -gt 0 ] || set -- -u named -g
+exec named "$@"
